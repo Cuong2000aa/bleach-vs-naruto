@@ -1,30 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bleach vs Naruto 3.3</title>
-    <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-      }
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bleach vs Naruto - Web Edition</title>
+  <link rel="icon" href="assets/map/random.png" type="image/png" />
+  <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0d0f12;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      background: #16191f;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #282d37;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ff9800, #ff5722);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .controls-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      background: #212631;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: #30363d;
+      color: #fff;
+    }
+    .btn.active {
+      background: #ff9800;
+      color: #0d0f12;
+      font-weight: 700;
+      border-color: #ff9800;
+      box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
+    }
+    #game-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      width: 100%;
+      height: 100%;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    ruffle-player, object {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    /* Modal Hướng dẫn phím */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 520px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      color: #ff9800;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #8b949e;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .key-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .player-box {
+      background: #0d1117;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #21262d;
+    }
+    .player-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #58a6ff;
+    }
+    kbd {
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #f0883e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Bleach vs Naruto</h1>
+      <span style="font-size: 12px; color: #8b949e;">Web Edition</span>
+    </div>
 
-      object {
-        width: 100%;
-        height: 100vh;
+    <div class="controls-nav">
+      <button id="btn-full" class="btn active" onclick="loadGame('game.swf', 'btn-full')">
+        🎮 Bản Full 3.3
+      </button>
+      <button id="btn-modular" class="btn" onclick="loadGame('FighterTester.swf', 'btn-modular')">
+        ⚡ Chế Độ Mở Rộng (Test SWF)
+      </button>
+      <button class="btn" onclick="toggleModal(true)">
+        ⌨️ Phím Bấm
+      </button>
+      <button class="btn" onclick="toggleFullscreen()">
+        ⛶ Toàn Màn Hình
+      </button>
+    </div>
+  </header>
+
+  <main id="game-wrapper">
+    <div id="game-container"></div>
+  </main>
+
+  <div id="guide-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Hướng Dẫn Phím Điều Khiển</h3>
+        <button class="close-btn" onclick="toggleModal(false)">&times;</button>
+      </div>
+      <div class="key-grid">
+        <div class="player-box">
+          <div class="player-title">👤 Người chơi 1 (P1)</div>
+          <div>Di chuyển: <kbd>A</kbd> <kbd>D</kbd></div>
+          <div>Nhảy / Ngồi: <kbd>W</kbd> / <kbd>S</kbd></div>
+          <div>Tấn công: <kbd>J</kbd></div>
+          <div>Nhảy cao: <kbd>K</kbd></div>
+          <div>Lướt (Dash): <kbd>L</kbd></div>
+          <div>Chiêu phụ: <kbd>U</kbd></div>
+          <div>Tuyệt chiêu: <kbd>I</kbd></div>
+          <div>Trợ thủ: <kbd>O</kbd></div>
+        </div>
+        <div class="player-box">
+          <div class="player-title">👥 Người chơi 2 (P2)</div>
+          <div>Di chuyển: <kbd>←</kbd> <kbd>→</kbd></div>
+          <div>Nhảy / Ngồi: <kbd>↑</kbd> / <kbd>↓</kbd></div>
+          <div>Tấn công: <kbd>1</kbd> (Numpad)</div>
+          <div>Nhảy cao: <kbd>2</kbd> (Numpad)</div>
+          <div>Lướt: <kbd>3</kbd> (Numpad)</div>
+          <div>Chiêu phụ: <kbd>4</kbd> (Numpad)</div>
+          <div>Tuyệt chiêu: <kbd>5</kbd> (Numpad)</div>
+          <div>Trợ thủ: <kbd>6</kbd> (Numpad)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ruffleInstance = null;
+    let player = null;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const ruffle = window.RufflePlayer.newest();
+      ruffleInstance = ruffle;
+      loadGame("game.swf", "btn-full");
+    });
+
+    function loadGame(swfFile, activeBtnId) {
+      document.querySelectorAll(".controls-nav .btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(activeBtnId);
+      if (btn) btn.classList.add("active");
+
+      const container = document.getElementById("game-container");
+      container.innerHTML = "";
+
+      if (!ruffleInstance) return;
+
+      player = ruffleInstance.createPlayer();
+      player.style.width = "100%";
+      player.style.height = "100%";
+      container.appendChild(player);
+
+      player.load({
+        url: swfFile,
+        allowScriptAccess: true,
+        letterbox: "on",
+        autoplay: "on"
+      });
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById("game-wrapper");
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => alert("Không thể mở toàn màn hình: " + err.message));
+      } else {
+        document.exitFullscreen();
       }
-    </style>
-  </head>
-  <body>
-    <object id="embed" data="./game.swf" type="application/x-shockwave-flash">
-      <param name="movie" value="./game.swf" />
-      <param name="wmode" value="direct" />
-      <param name="base" value="." />
-      <param name="quality" value="high" />
-      <param name="allowScriptAccess" value="always" />
-    </object>
-  </body>
+    }
+
+    function toggleModal(show) {
+      const modal = document.getElementById("guide-modal");
+      if (show) modal.classList.add("show");
+      else modal.classList.remove("show");
+    }
+  </script>
+</body>
 </html>
