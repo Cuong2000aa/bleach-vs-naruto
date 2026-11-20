@@ -45,13 +45,14 @@
     .controls-nav {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .btn {
       background: #212631;
       color: #c9d1d9;
       border: 1px solid #30363d;
-      padding: 7px 16px;
+      padding: 7px 14px;
       border-radius: 6px;
       font-size: 13px;
       font-weight: 500;
@@ -68,6 +69,19 @@
       font-weight: 700;
       border-color: #ff9800;
       box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
+    }
+    .btn.highlight {
+      background: #238636;
+      border-color: #2ea043;
+      color: #fff;
+    }
+    .btn.highlight:hover {
+      background: #2ea043;
+    }
+    .btn.highlight.active {
+      background: #2ea043;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(46, 160, 67, 0.5);
     }
     #game-wrapper {
       flex: 1;
@@ -163,15 +177,18 @@
   <header>
     <div class="brand">
       <h1>Bleach vs Naruto</h1>
-      <span style="font-size: 12px; color: #8b949e;">Web Edition</span>
+      <span style="font-size: 12px; color: #8b949e;">Multiplatform Web Edition</span>
     </div>
 
     <div class="controls-nav">
-      <button id="btn-full" class="btn active" onclick="loadGame('game.swf', 'btn-full')">
-        🎮 Bản Full 3.3
+      <button id="btn-web-play" class="btn highlight active" onclick="loadGame('bvn_web/loader.swf', 'bvn_web/', 'btn-web-play')">
+        ⚔️ Bản Web Chơi Ngay (Mượt 100%)
       </button>
-      <button id="btn-modular" class="btn" onclick="loadGame('FighterTester.swf', 'btn-modular')">
-        ⚡ Chế Độ Mở Rộng (Test SWF)
+      <button id="btn-full" class="btn" onclick="loadGame('game.swf', '.', 'btn-full')">
+        🎮 Bản Gốc 3.3
+      </button>
+      <button id="btn-modular" class="btn" onclick="loadGame('FighterTester.swf', '.', 'btn-modular')">
+        ⚡ Chế Độ Mở Rộng
       </button>
       <button class="btn" onclick="toggleModal(true)">
         ⌨️ Phím Bấm
@@ -224,12 +241,13 @@
     let player = null;
 
     window.addEventListener("DOMContentLoaded", () => {
+      window.RufflePlayer = window.RufflePlayer || {};
       const ruffle = window.RufflePlayer.newest();
       ruffleInstance = ruffle;
-      loadGame("game.swf", "btn-full");
+      loadGame("bvn_web/loader.swf", "bvn_web/", "btn-web-play");
     });
 
-    function loadGame(swfFile, activeBtnId) {
+    function loadGame(swfFile, baseUrl, activeBtnId) {
       document.querySelectorAll(".controls-nav .btn").forEach(b => b.classList.remove("active"));
       const btn = document.getElementById(activeBtnId);
       if (btn) btn.classList.add("active");
@@ -246,6 +264,7 @@
 
       player.load({
         url: swfFile,
+        base: baseUrl || ".",
         allowScriptAccess: true,
         letterbox: "on",
         autoplay: "on"
