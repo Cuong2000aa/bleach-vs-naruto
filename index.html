@@ -2,8 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bleach vs Naruto - Web Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Bleach vs Naruto - Web Edition (RG557 / Handheld Optimized)</title>
   <link rel="icon" href="assets/map/random.png" type="image/png" />
   <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
   <style>
@@ -11,53 +14,79 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     body {
-      background: #0d0f12;
+      background: #000000;
       color: #e0e0e0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       height: 100vh;
+      width: 100vw;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
     }
     header {
-      background: #16191f;
-      padding: 10px 20px;
+      background: #0d1017;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #282d37;
+      border-bottom: 1px solid #1f242c;
       z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    header.hidden-header {
+      transform: translateY(-100%);
+      position: absolute;
+      width: 100%;
     }
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .brand h1 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       background: linear-gradient(90deg, #ff9800, #ff5722);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+    }
+    .tag-badge {
+      font-size: 11px;
+      background: #1f6feb22;
+      color: #58a6ff;
+      border: 1px solid #1f6feb55;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-weight: 600;
+      white-space: nowrap;
     }
     .controls-nav {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .btn {
-      background: #212631;
+      background: #161b22;
       color: #c9d1d9;
       border: 1px solid #30363d;
-      padding: 7px 14px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
     .btn:hover {
       background: #30363d;
@@ -65,7 +94,7 @@
     }
     .btn.active {
       background: #ff9800;
-      color: #0d0f12;
+      color: #000;
       font-weight: 700;
       border-color: #ff9800;
       box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
@@ -83,15 +112,17 @@
       color: #fff;
       box-shadow: 0 0 10px rgba(46, 160, 67, 0.5);
     }
+
     #game-wrapper {
       flex: 1;
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #000;
+      background: #000000;
       width: 100%;
       height: 100%;
+      overflow: hidden;
     }
     #game-container {
       width: 100%;
@@ -99,19 +130,169 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      background: #000000;
     }
     ruffle-player, object {
       width: 100% !important;
       height: 100% !important;
+      background: #000000 !important;
     }
+
+    /* Floating quick toggle when header is hidden */
+    #float-toggle-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(22, 27, 34, 0.7);
+      color: #8b949e;
+      border: 1px solid rgba(48, 54, 61, 0.8);
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      z-index: 150;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.2s;
+      opacity: 0.6;
+    }
+    #float-toggle-btn:hover {
+      opacity: 1;
+      color: #fff;
+    }
+
+    /* Gamepad Toast Banner */
+    #gamepad-toast {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(13, 17, 23, 0.92);
+      border: 1px solid #238636;
+      color: #3fb950;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 160;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    #gamepad-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Virtual Touch Gamepad Overlay (Cho RG557 Touch & Mobile) */
+    .virtual-controls {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 20px 24px;
+    }
+    .virtual-controls.hidden-overlay {
+      display: none !important;
+    }
+    .vpad-group {
+      pointer-events: auto;
+      display: flex;
+      position: relative;
+    }
+    /* Left D-pad */
+    .vpad-dpad {
+      width: 160px;
+      height: 160px;
+      position: relative;
+    }
+    .vbtn-dir {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      background: rgba(30, 35, 45, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      backdrop-filter: blur(8px);
+      touch-action: none;
+    }
+    .vbtn-dir:active, .vbtn-dir.pressed {
+      background: rgba(255, 152, 0, 0.7);
+      border-color: #ff9800;
+      transform: scale(0.92);
+    }
+    .vbtn-up    { top: 0; left: 56px; }
+    .vbtn-down  { bottom: 0; left: 56px; }
+    .vbtn-left  { top: 56px; left: 0; }
+    .vbtn-right { top: 56px; right: 0; }
+
+    /* Right Action Buttons Cluster */
+    .vpad-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 52px);
+      grid-template-rows: repeat(2, 52px);
+      gap: 12px;
+    }
+    .vbtn-act {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(30, 35, 45, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      backdrop-filter: blur(8px);
+      touch-action: none;
+      line-height: 1.1;
+    }
+    .vbtn-act small {
+      font-size: 8px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+    .vbtn-act:active, .vbtn-act.pressed {
+      transform: scale(0.92);
+    }
+    .vbtn-j { border-color: #ff5722; background: rgba(255, 87, 34, 0.4); }
+    .vbtn-j:active, .vbtn-j.pressed { background: #ff5722; }
+    .vbtn-k { border-color: #4caf50; background: rgba(76, 175, 80, 0.4); }
+    .vbtn-k:active, .vbtn-k.pressed { background: #4caf50; }
+    .vbtn-l { border-color: #2196f3; background: rgba(33, 150, 243, 0.4); }
+    .vbtn-l:active, .vbtn-l.pressed { background: #2196f3; }
+    .vbtn-u { border-color: #9c27b0; background: rgba(156, 39, 176, 0.4); }
+    .vbtn-u:active, .vbtn-u.pressed { background: #9c27b0; }
+    .vbtn-i { border-color: #e91e63; background: rgba(233, 30, 99, 0.5); }
+    .vbtn-i:active, .vbtn-i.pressed { background: #e91e63; }
+    .vbtn-o { border-color: #00bcd4; background: rgba(0, 188, 212, 0.4); }
+    .vbtn-o:active, .vbtn-o.pressed { background: #00bcd4; }
+
     /* Modal Hướng dẫn phím */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 200;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 250;
       justify-content: center;
       align-items: center;
     }
@@ -119,79 +300,98 @@
       display: flex;
     }
     .modal-content {
-      background: #161b22;
+      background: #11141a;
       border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 24px;
-      max-width: 520px;
-      width: 90%;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 680px;
+      width: 92%;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
     }
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 10px;
     }
     .modal-header h3 {
-      font-size: 18px;
+      font-size: 17px;
       color: #ff9800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .close-btn {
       background: transparent;
       border: none;
       color: #8b949e;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
+      line-height: 1;
     }
     .key-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
       font-size: 13px;
       line-height: 1.6;
     }
     .player-box {
-      background: #0d1117;
+      background: #080a0d;
       padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #21262d;
+      border-radius: 8px;
+      border: 1px solid #1f242c;
+    }
+    .player-box.handheld-box {
+      border-color: #388bfd55;
+      background: #0d1117;
     }
     .player-title {
       font-weight: 700;
       margin-bottom: 8px;
       color: #58a6ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     kbd {
-      background: #21262d;
+      background: #1f242c;
       border: 1px solid #30363d;
-      border-radius: 3px;
+      border-radius: 4px;
       padding: 2px 6px;
       font-size: 11px;
       font-family: monospace;
       color: #f0883e;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <header>
+  <header id="main-header">
     <div class="brand">
       <h1>Bleach vs Naruto</h1>
-      <span style="font-size: 12px; color: #8b949e;">Multiplatform Web Edition</span>
+      <span class="tag-badge">🎮 RG557 & Handheld Ready</span>
     </div>
 
     <div class="controls-nav">
       <button id="btn-web-play" class="btn highlight active" onclick="loadGame('bvn_web/loader.swf', 'bvn_web/', 'btn-web-play')">
-        ⚔️ Bản Web Chơi Ngay (Mượt 100%)
+        ⚔️ Web Chơi Ngay (Mượt)
       </button>
       <button id="btn-full" class="btn" onclick="loadGame('game.swf', '.', 'btn-full')">
         🎮 Bản Gốc 3.3
       </button>
       <button id="btn-modular" class="btn" onclick="loadGame('FighterTester.swf', '.', 'btn-modular')">
-        ⚡ Chế Độ Mở Rộng
+        ⚡ Bản Mở Rộng
+      </button>
+      <button id="btn-vpad" class="btn" onclick="toggleVirtualControls()">
+        🕹️ Nút Ảo (Tắt/Bật)
       </button>
       <button class="btn" onclick="toggleModal(true)">
-        ⌨️ Phím Bấm
+        ⌨️ Nút & Tay Cầm
       </button>
       <button class="btn" onclick="toggleFullscreen()">
         ⛶ Toàn Màn Hình
@@ -200,18 +400,58 @@
   </header>
 
   <main id="game-wrapper">
+    <div id="float-toggle-btn" onclick="toggleHeader()">⚙️ Menu</div>
+    <div id="gamepad-toast">🎮 Đã kết nối tay cầm! Sẵn sàng chiến trên RG557.</div>
+
     <div id="game-container"></div>
+
+    <!-- Virtual Touch Pad (cho Touch RG557 / Điện thoại) -->
+    <div id="virtual-controls" class="virtual-controls hidden-overlay">
+      <div class="vpad-group">
+        <div class="vpad-dpad">
+          <button class="vbtn-dir vbtn-up" data-code="KeyW" data-key="w" data-kcode="87">▲</button>
+          <button class="vbtn-dir vbtn-left" data-code="KeyA" data-key="a" data-kcode="65">◀</button>
+          <button class="vbtn-dir vbtn-down" data-code="KeyS" data-key="s" data-kcode="83">▼</button>
+          <button class="vbtn-dir vbtn-right" data-code="KeyD" data-key="d" data-kcode="68">▶</button>
+        </div>
+      </div>
+
+      <div class="vpad-group">
+        <div class="vpad-actions">
+          <button class="vbtn-act vbtn-u" data-code="KeyU" data-key="u" data-kcode="85">U<small>Chiêu 1</small></button>
+          <button class="vbtn-act vbtn-i" data-code="KeyI" data-key="i" data-kcode="73">I<small>Tuyệt chiêu</small></button>
+          <button class="vbtn-act vbtn-o" data-code="KeyO" data-key="o" data-kcode="79">O<small>Trợ thủ</small></button>
+          <button class="vbtn-act vbtn-j" data-code="KeyJ" data-key="j" data-kcode="74">J<small>Đánh</small></button>
+          <button class="vbtn-act vbtn-k" data-code="KeyK" data-key="k" data-kcode="75">K<small>Nhảy</small></button>
+          <button class="vbtn-act vbtn-l" data-code="KeyL" data-key="l" data-kcode="76">L<small>Lướt</small></button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <div id="guide-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Hướng Dẫn Phím Điều Khiển</h3>
+        <h3>🎮 Hướng Dẫn Điều Khiển (RG557 & Bàn Phím)</h3>
         <button class="close-btn" onclick="toggleModal(false)">&times;</button>
       </div>
+
       <div class="key-grid">
+        <div class="player-box handheld-box">
+          <div class="player-title" style="color: #3fb950;">🎮 Anbernic RG557 / Tay Cầm</div>
+          <div>Di chuyển: <kbd>D-Pad</kbd> hoặc <kbd>Cần Analog Trái</kbd></div>
+          <div>Đánh thường (J): <kbd>Nút A</kbd></div>
+          <div>Nhảy (K): <kbd>Nút B</kbd></div>
+          <div>Chiêu phụ (U): <kbd>Nút X</kbd></div>
+          <div>Tuyệt chiêu Ulti (I): <kbd>Nút Y</kbd></div>
+          <div>Lướt / Dash (L): <kbd>Cò R1 (RB)</kbd></div>
+          <div>Gọi Trợ thủ (O): <kbd>Cò L1 (LB)</kbd></div>
+          <div>Bắt đầu / Chọn: <kbd>Start</kbd> / <kbd>Nút A</kbd></div>
+          <div>Thoát / Menu: <kbd>Select</kbd></div>
+        </div>
+
         <div class="player-box">
-          <div class="player-title">👤 Người chơi 1 (P1)</div>
+          <div class="player-title">👤 Bàn Phím 1 (P1)</div>
           <div>Di chuyển: <kbd>A</kbd> <kbd>D</kbd></div>
           <div>Nhảy / Ngồi: <kbd>W</kbd> / <kbd>S</kbd></div>
           <div>Tấn công: <kbd>J</kbd></div>
@@ -221,8 +461,9 @@
           <div>Tuyệt chiêu: <kbd>I</kbd></div>
           <div>Trợ thủ: <kbd>O</kbd></div>
         </div>
+
         <div class="player-box">
-          <div class="player-title">👥 Người chơi 2 (P2)</div>
+          <div class="player-title">👥 Bàn Phím 2 (P2)</div>
           <div>Di chuyển: <kbd>←</kbd> <kbd>→</kbd></div>
           <div>Nhảy / Ngồi: <kbd>↑</kbd> / <kbd>↓</kbd></div>
           <div>Tấn công: <kbd>1</kbd> (Numpad)</div>
@@ -239,12 +480,198 @@
   <script>
     let ruffleInstance = null;
     let player = null;
+    let headerVisible = true;
+    let virtualControlsEnabled = false;
+
+    // Dispatch KeyboardEvent to Ruffle & Window
+    function dispatchKey(type, code, key, keyCode) {
+      const target = player || window;
+      const evt = new KeyboardEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        key: key,
+        code: code,
+        keyCode: keyCode,
+        which: keyCode
+      });
+      if (player) player.dispatchEvent(evt);
+      window.dispatchEvent(evt);
+      document.dispatchEvent(evt);
+    }
+
+    // Gamepad API Implementation for RG557 & Android Controllers
+    const GAMEPAD_BUTTON_MAP = {
+      0: { code: 'KeyJ', key: 'j', keyCode: 74 }, // A (Attack / Confirm)
+      1: { code: 'KeyK', key: 'k', keyCode: 75 }, // B (Jump)
+      2: { code: 'KeyU', key: 'u', keyCode: 85 }, // X (Skill)
+      3: { code: 'KeyI', key: 'i', keyCode: 73 }, // Y (Ultimate)
+      4: { code: 'KeyO', key: 'o', keyCode: 79 }, // L1 (Assistant)
+      5: { code: 'KeyL', key: 'l', keyCode: 76 }, // R1 (Dash)
+      6: { code: 'KeyU', key: 'u', keyCode: 85 }, // L2
+      7: { code: 'KeyI', key: 'i', keyCode: 73 }, // R2
+      8: { code: 'Escape', key: 'Escape', keyCode: 27 }, // Select
+      9: { code: 'Enter', key: 'Enter', keyCode: 13 },   // Start
+      12: { code: 'KeyW', key: 'w', keyCode: 87 }, // D-pad Up
+      13: { code: 'KeyS', key: 's', keyCode: 83 }, // D-pad Down
+      14: { code: 'KeyA', key: 'a', keyCode: 65 }, // D-pad Left
+      15: { code: 'KeyD', key: 'd', keyCode: 68 }, // D-pad Right
+    };
+
+    const gpState = {};
+
+    function pollGamepad() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      let activeGp = null;
+      for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+          activeGp = gamepads[i];
+          break;
+        }
+      }
+
+      if (activeGp) {
+        // Buttons
+        for (const [btnIdx, map] of Object.entries(GAMEPAD_BUTTON_MAP)) {
+          const btn = activeGp.buttons[btnIdx];
+          const isPressed = btn && (btn.pressed || btn.value > 0.45);
+          const stateKey = `btn_${btnIdx}`;
+
+          if (isPressed && !gpState[stateKey]) {
+            gpState[stateKey] = true;
+            dispatchKey('keydown', map.code, map.key, map.keyCode);
+
+            // Haptic vibration feedback for RG557
+            if ((btnIdx === '0' || btnIdx === '3') && activeGp.vibrationActuator) {
+              activeGp.vibrationActuator.playEffect('dual-rumble', {
+                startDelay: 0,
+                duration: btnIdx === '3' ? 80 : 35,
+                weakMagnitude: 0.5,
+                strongMagnitude: btnIdx === '3' ? 0.9 : 0.4
+              }).catch(() => {});
+            }
+          } else if (!isPressed && gpState[stateKey]) {
+            gpState[stateKey] = false;
+            dispatchKey('keyup', map.code, map.key, map.keyCode);
+          }
+        }
+
+        // Left Analog Stick (Axes 0: X, 1: Y)
+        const axisX = activeGp.axes[0] || 0;
+        const axisY = activeGp.axes[1] || 0;
+        const DEADZONE = 0.35;
+
+        // Stick X (A / D)
+        const stickLeft = axisX < -DEADZONE;
+        const stickRight = axisX > DEADZONE;
+        if (stickLeft && !gpState.stickLeft) {
+          gpState.stickLeft = true;
+          dispatchKey('keydown', 'KeyA', 'a', 65);
+        } else if (!stickLeft && gpState.stickLeft) {
+          gpState.stickLeft = false;
+          dispatchKey('keyup', 'KeyA', 'a', 65);
+        }
+        if (stickRight && !gpState.stickRight) {
+          gpState.stickRight = true;
+          dispatchKey('keydown', 'KeyD', 'd', 68);
+        } else if (!stickRight && gpState.stickRight) {
+          gpState.stickRight = false;
+          dispatchKey('keyup', 'KeyD', 'd', 68);
+        }
+
+        // Stick Y (W / S)
+        const stickUp = axisY < -DEADZONE;
+        const stickDown = axisY > DEADZONE;
+        if (stickUp && !gpState.stickUp) {
+          gpState.stickUp = true;
+          dispatchKey('keydown', 'KeyW', 'w', 87);
+        } else if (!stickUp && gpState.stickUp) {
+          gpState.stickUp = false;
+          dispatchKey('keyup', 'KeyW', 'w', 87);
+        }
+        if (stickDown && !gpState.stickDown) {
+          gpState.stickDown = true;
+          dispatchKey('keydown', 'KeyS', 's', 83);
+        } else if (!stickDown && gpState.stickDown) {
+          gpState.stickDown = false;
+          dispatchKey('keyup', 'KeyS', 's', 83);
+        }
+      }
+
+      requestAnimationFrame(pollGamepad);
+    }
+
+    // Gamepad Connection Listeners
+    window.addEventListener("gamepadconnected", (e) => {
+      showToast(`🎮 Tay cầm đã kết nối: ${e.gamepad.id.substring(0, 24)}... (Sẵn sàng chiến!)`);
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById("gamepad-toast");
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 4000);
+    }
+
+    // Touch Virtual Buttons Binding
+    function setupVirtualControls() {
+      const btns = document.querySelectorAll(".virtual-controls button");
+      btns.forEach(btn => {
+        const code = btn.dataset.code;
+        const key = btn.dataset.key;
+        const keyCode = parseInt(btn.dataset.kcode, 10);
+
+        const onStart = (e) => {
+          e.preventDefault();
+          btn.classList.add("pressed");
+          dispatchKey("keydown", code, key, keyCode);
+          if (navigator.vibrate) navigator.vibrate(20);
+        };
+        const onEnd = (e) => {
+          e.preventDefault();
+          btn.classList.remove("pressed");
+          dispatchKey("keyup", code, key, keyCode);
+        };
+
+        btn.addEventListener("touchstart", onStart, { passive: false });
+        btn.addEventListener("touchend", onEnd, { passive: false });
+        btn.addEventListener("touchcancel", onEnd, { passive: false });
+        btn.addEventListener("mousedown", onStart);
+        btn.addEventListener("mouseup", onEnd);
+        btn.addEventListener("mouseleave", onEnd);
+      });
+    }
+
+    function toggleVirtualControls() {
+      const vpad = document.getElementById("virtual-controls");
+      const btn = document.getElementById("btn-vpad");
+      virtualControlsEnabled = !virtualControlsEnabled;
+      if (virtualControlsEnabled) {
+        vpad.classList.remove("hidden-overlay");
+        btn.classList.add("active");
+      } else {
+        vpad.classList.add("hidden-overlay");
+        btn.classList.remove("active");
+      }
+    }
+
+    function toggleHeader() {
+      const header = document.getElementById("main-header");
+      headerVisible = !headerVisible;
+      if (headerVisible) {
+        header.classList.remove("hidden-header");
+      } else {
+        header.classList.add("hidden-header");
+      }
+    }
 
     window.addEventListener("DOMContentLoaded", () => {
       window.RufflePlayer = window.RufflePlayer || {};
       const ruffle = window.RufflePlayer.newest();
       ruffleInstance = ruffle;
       loadGame("bvn_web/loader.swf", "bvn_web/", "btn-web-play");
+      setupVirtualControls();
+      requestAnimationFrame(pollGamepad);
     });
 
     function loadGame(swfFile, baseUrl, activeBtnId) {
@@ -275,8 +702,15 @@
       const elem = document.getElementById("game-wrapper");
       if (!document.fullscreenElement) {
         elem.requestFullscreen().catch(err => alert("Không thể mở toàn màn hình: " + err.message));
+        // Auto hide header on fullscreen for 100% AMOLED screen usage
+        const header = document.getElementById("main-header");
+        header.classList.add("hidden-header");
+        headerVisible = false;
       } else {
         document.exitFullscreen();
+        const header = document.getElementById("main-header");
+        header.classList.remove("hidden-header");
+        headerVisible = true;
       }
     }
 
