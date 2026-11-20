@@ -397,11 +397,11 @@
 
     <div class="controls-nav">
       <!-- 2 Game Chế Độ Đỉnh Cao Nhất -->
-      <button id="btn-web-play" class="btn highlight active" onclick="loadGameMode('bvn')">
-        <span id="txt-btn-bvn">⚔️ Bleach vs Naruto</span>
+      <button id="btn-stars" class="btn accent active" onclick="loadGameMode('stars')">
+        <span id="txt-btn-stars">🔥 Bản Gộp: Đại Chiến Anh Hùng (Luffy & Goku)</span>
       </button>
-      <button id="btn-stars" class="btn accent" onclick="loadGameMode('stars')">
-        <span id="txt-btn-stars">🔥 Đại Chiến Anh Hùng (Luffy & Goku)</span>
+      <button id="btn-web-play" class="btn highlight" onclick="loadGameMode('bvn')">
+        <span id="txt-btn-bvn">⚔️ Bleach vs Naruto (Bản Gốc 3.3)</span>
       </button>
 
       <!-- Tiện ích & Điều khiển -->
@@ -505,22 +505,22 @@
 
   <script>
     // BUILD_VERSION for automatic cache busting on every deploy
-    const BUILD_VERSION = "2026.11.20_rev3";
+    const BUILD_VERSION = "2026.11.20_rev4";
 
     let ruffleInstance = null;
     let player = null;
     let headerVisible = true;
     let virtualControlsEnabled = false;
     let currentLang = localStorage.getItem("bvn_lang") || "vi"; // 'vi' or 'en'
-    let currentMode = localStorage.getItem("bvn_active_mode") || "bvn"; // 'bvn' or 'stars'
+    let currentMode = localStorage.getItem("bvn_active_mode") || "stars"; // Default to 'stars' (Bản Gộp Đầy Đủ Tướng)
 
     // Multi-language Dictionary (Vietnamese & English only - NO Chinese)
     const I18N = {
       vi: {
         title: "Bleach vs Naruto & Đại Chiến Anh Hùng",
         badge: "🎮 RG557 & Web Ready",
-        btnBvn: "⚔️ Bleach vs Naruto",
-        btnStars: "🔥 Đại Chiến Anh Hùng (Luffy & Goku)",
+        btnBvn: "⚔️ Bleach vs Naruto (Bản Gốc 3.3)",
+        btnStars: "🔥 Bản Gộp: Đại Chiến Anh Hùng (Luffy & Goku)",
         btnVpad: "🕹️ Nút Ảo (Tắt/Bật)",
         btnGuide: "⌨️ Nút & Tay Cầm",
         btnFs: "⛶ Toàn Màn Hình",
@@ -568,8 +568,8 @@
       en: {
         title: "Bleach vs Naruto & Comic Stars Fighting",
         badge: "🎮 RG557 & Web Ready",
-        btnBvn: "⚔️ Bleach vs Naruto",
-        btnStars: "🔥 Comic Stars (Luffy & Goku)",
+        btnBvn: "⚔️ Bleach vs Naruto (Original 3.3)",
+        btnStars: "🔥 Crossover: Comic Stars (Luffy & Goku)",
         btnVpad: "🕹️ Virtual Pad (On/Off)",
         btnGuide: "⌨️ Controls & Gamepad",
         btnFs: "⛶ Fullscreen",
@@ -681,6 +681,8 @@
       if (storedVer && storedVer !== BUILD_VERSION) {
         console.log("New version detected:", BUILD_VERSION, "Clearing browser cache...");
         localStorage.setItem("bvn_build_version", BUILD_VERSION);
+        localStorage.setItem("bvn_active_mode", "stars");
+        currentMode = "stars";
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => caches.delete(name));
