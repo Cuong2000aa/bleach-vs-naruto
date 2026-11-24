@@ -391,18 +391,14 @@
 <body>
   <header id="main-header">
     <div class="brand">
-      <h1 id="txt-title">Bleach vs Naruto & Đại Chiến Anh Hùng</h1>
+      <h1 id="txt-title">Bleach vs Naruto</h1>
       <span class="tag-badge" id="txt-badge">🎮 RG557 & Web Ready</span>
     </div>
 
     <div class="controls-nav">
-      <!-- 2 Game Chế Độ Đỉnh Cao Nhất -->
-      <button id="btn-stars" class="btn accent active" onclick="loadGameMode('stars')">
-        <span id="txt-btn-stars">🔥 Bản Gộp: Đại Chiến Anh Hùng (Luffy & Goku)</span>
-      </button>
-      <button id="btn-web-play" class="btn highlight" onclick="loadGameMode('bvn')">
-        <span id="txt-btn-bvn">⚔️ Bleach vs Naruto (Bản Gốc 3.3)</span>
-      </button>
+      <div class="brand" style="margin-right: 6px;">
+        <span class="tag-badge" style="background: #23863622; color: #3fb950; border-color: #23863655;">⚔️ 45+ Tướng Chuẩn</span>
+      </div>
 
       <!-- Tiện ích & Điều khiển -->
       <button id="btn-vpad" class="btn" onclick="toggleVirtualControls()">
@@ -505,7 +501,7 @@
 
   <script>
     // BUILD_VERSION for automatic cache busting on every deploy
-    const BUILD_VERSION = "2026.11.20_rev4";
+    const BUILD_VERSION = "2026.11.24_rev1";
 
     let ruffleInstance = null;
     let player = null;
@@ -517,7 +513,7 @@
     // Multi-language Dictionary (Vietnamese & English only - NO Chinese)
     const I18N = {
       vi: {
-        title: "Bleach vs Naruto & Đại Chiến Anh Hùng",
+        title: "Bleach vs Naruto (45+ Tướng Chuẩn)",
         badge: "🎮 RG557 & Web Ready",
         btnBvn: "⚔️ Bleach vs Naruto (Bản Gốc 3.3)",
         btnStars: "🔥 Bản Gộp: Đại Chiến Anh Hùng (Luffy & Goku)",
@@ -566,7 +562,7 @@
         lblL: "Lướt"
       },
       en: {
-        title: "Bleach vs Naruto & Comic Stars Fighting",
+        title: "Bleach vs Naruto (Official 45+ Fighters)",
         badge: "🎮 RG557 & Web Ready",
         btnBvn: "⚔️ Bleach vs Naruto (Original 3.3)",
         btnStars: "🔥 Crossover: Comic Stars (Luffy & Goku)",
@@ -950,7 +946,7 @@
       const ruffle = window.RufflePlayer.newest();
       ruffleInstance = ruffle;
 
-      loadGameMode(currentMode);
+      loadBvnGame();
       setupVirtualControls();
       requestAnimationFrame(pollGamepad);
     });
